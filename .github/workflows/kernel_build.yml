@@ -13,7 +13,7 @@ jobs:
     steps:
       # Step 1: Checkout Source Code
       - name: Checkout Source Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Step 2: Set up Build Environment
       - name: Set up Build Environment
