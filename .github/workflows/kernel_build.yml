@@ -1,0 +1,44 @@
+name: Redmi 9C NFC NetHunter Kernel Build
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+
+      - name: Set up Build Environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bc bison build-essential cpio flex libssl-dev \
+          libncurses-dev python3 python3-pip
+
+      - name: Download Toolchain (aarch64)
+        run: |
+          mkdir -p toolchains
+          curl -L https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/+archive/master.tar.gz | tar -xz -C toolchains
+
+      - name: Configure Kernel
+        run: |
+          export ARCH=arm64
+          export CROSS_COMPILE=$GITHUB_WORKSPACE/toolchains/bin/aarch64-linux-android-
+          make angelican_defconfig
+
+      - name: Build Kernel
+        run: |
+          export ARCH=arm64
+          export CROSS_COMPILE=$GITHUB_WORKSPACE/toolchains/bin/aarch64-linux-android-
+          make -j$(nproc) Image.gz-dtb
+
+      - name: Upload Kernel Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: redmi9c-kernel
+          path: arch/arm64/boot/Image.gz-dtb
